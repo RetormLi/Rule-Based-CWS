@@ -3,7 +3,7 @@
 
 from typing import List, AnyStr, Dict, Set
 
-max_vocab_length = 4
+max_vocab_length = 8
 
 
 def FMM(string: AnyStr, vocab: Dict):
