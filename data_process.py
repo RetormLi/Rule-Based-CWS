@@ -93,12 +93,10 @@ def generate_vocab(origin_path, save_path):
         json.dump(vocab, save_file, ensure_ascii=False)
 
 
-# escape = ['一次', '这个', '那个', '这次', '那次', '此次', '最低',
-#           '最高', '最多', '最少', '最佳', '最好', '最新', '就是',
-#           '都是', '一天']
 escape = ['一次', '这个', '那个', '这次', '那次', '此次', '最低',
           '最高', '最多', '最少', '最佳', '最好', '最新', '就是',
-          '都是', '一天']
+          '都是', '一天', '同一', '一个', '各个', '每个', '哪个']
+
 if __name__ == '__main__':
     # generate_vocab('data/THUOCL_diming.txt', 'vocab/diming_vocab.json')
     # generate_vocab('data/THUOCL_chengyu.txt', 'vocab/chengyu_vocab.json')
