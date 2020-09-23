@@ -16,9 +16,6 @@ class Data:
                 new_line = cop.sub('', line)
                 for word in new_line.split():
                     vocab[word] = vocab.get(word, 0) + 1
-            # for line in data_file:
-            #     for word in line.split():
-            #         vocab[word] = vocab.get(word, 0) + 1
         if save_path is not None:
             with open(save_path, 'w', encoding='utf-8') as json_file:
                 json.dump(vocab, json_file, ensure_ascii=False)
@@ -41,36 +38,6 @@ class Data:
         print(max_length)
         return vocab
 
-    def get_line(self, split=True):
-        with open(self.data_path, 'r', encoding='utf-8') as data_file:
-            for line in data_file:
-                if split:
-                    yield line.split()
-                else:
-                    yield line
-
-
-class Vocab:
-    def __init__(self, path):
-        self.path = path
-        with open(path, "r", encoding='utf-8') as json_file:
-            self.vocab_dict = json.load(json_file)
-
-    def __getitem__(self, item):
-        if item in self.vocab_dict:
-            return self.vocab_dict[item]
-        else:
-            raise KeyError
-
-    def __contains__(self, item):
-        return item in self.vocab_dict
-
-    def get(self, key, value):
-        return self.vocab_dict.get(key, value)
-
-    def add(self, new_dict):
-        pass
-
 
 def get_vocab(path):
     with open(path, "r", encoding='utf-8') as json_file:
@@ -82,13 +49,21 @@ def store_vocab(path, vocab):
         json.dump(vocab, json_file, ensure_ascii=False)
 
 
-def generate_vocab(origin_path, save_path):
+def THUOCL_get_word(line):
+    return line[:line.find('\t')]
+
+
+def naive_get_word(line):
+    return line
+
+
+def generate_vocab(origin_path, save_path, func=naive_get_word, max_len=3):
     vocab = dict()
     with open(origin_path, 'r', encoding='utf-8') as origin_file:
         for line in origin_file:
-            # word = line[:line.find('\t')]
-            word = line
-            vocab[word] = vocab.get(word, 0) + 1
+            word = func(line)
+            if len(word) <= max_len:
+                vocab[word] = vocab.get(word, 0) + 1
     with open(save_path, 'w', encoding='utf-8') as save_file:
         json.dump(vocab, save_file, ensure_ascii=False)
 
@@ -98,10 +73,10 @@ escape = ['一次', '这个', '那个', '这次', '那次', '此次', '最低',
           '都是', '一天', '同一', '一个', '各个', '每个', '哪个']
 
 if __name__ == '__main__':
-    # generate_vocab('data/THUOCL_diming.txt', 'vocab/diming_vocab.json')
-    # generate_vocab('data/THUOCL_chengyu.txt', 'vocab/chengyu_vocab.json')
-    # generate_vocab('data/THUOCL_caijing.txt', 'vocab/caijing_vocab.json')
-    # generate_vocab('data/THUOCL_food.txt', 'vocab/food_vocab.json')
+    # generate_vocab('data/THUOCL_diming.txt', 'vocab/diming_vocab.json', THUOCL_get_word)
+    # generate_vocab('data/THUOCL_chengyu.txt', 'vocab/chengyu_vocab.json', THUOCL_get_word)
+    # generate_vocab('data/THUOCL_caijing.txt', 'vocab/caijing_vocab.json', THUOCL_get_word)
+    # generate_vocab('data/THUOCL_food.txt', 'vocab/food_vocab.json', THUOCL_get_word)
     # pku = Data('data/Chinese_Names_Corpus（120W）.txt')
     # pku.zh_token2vocab('vocab/ch_name_vocab.json')
     store_vocab('vocab/escape_vocab.json', dict(zip(escape, [1 for x in escape])))

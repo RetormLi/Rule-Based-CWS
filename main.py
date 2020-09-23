@@ -13,14 +13,15 @@ if __name__ == "__main__":
                    'vocab/diming_vocab.json',
                    'vocab/pku_vocab.json',
                    'vocab/eng_name_vocab.json']
+    for path in vocab_paths:
+        vocab.update(data_process.get_vocab(path))
 
     escape_path = 'vocab/escape_vocab.json'
     escape_vocab = data_process.get_vocab(escape_path)
-    for path in vocab_paths:
-        vocab.update(data_process.get_vocab(path))
     for escape_word in escape_vocab:
         if escape_word in vocab:
             del vocab[escape_word]
+
     data_process.store_vocab('vocab/big_vocab_dict.json', vocab)
 
     with open('data/test.txt', 'r', encoding='utf-8') as test_file:
