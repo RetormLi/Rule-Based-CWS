@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
+import preprocess
+import analyze
 
 
 def match_count(target, pred):
@@ -69,12 +71,29 @@ def recall(target, pred):
 def f1_score(target, pred):
     prec = precision(target, pred)
     rec = recall(target, pred)
+    if prec == 0 and rec == 0:
+        return 0
     return (2 * prec * rec) / (prec + rec)
 
 
-# if __name__ == '__main__':
-#     target = '我 爱 中国'.split()
-#     pred = '我爱 中国'.split()
-#     print('prec: ', precision(target, pred))
-#     print('recall: ', recall(target, pred))
-#     print('F1: ', f1_score(target, pred))
+def average(lst):
+    return sum(lst) / len(lst)
+
+
+def evaluate(dev_path, vocab):
+    precisions = []
+    recalls = []
+    f1s = []
+    with open(dev_path, 'r', encoding='utf-8') as dev_file:
+        for line in dev_file:
+            origin_line = line.replace(' ', '')
+            preprocess_sentence, matched = preprocess.preprocess(origin_line)
+            split_sentence = analyze.analyze(preprocess_sentence, matched, vocab).split()
+            target_sentence = line.split()
+            precisions.append(precision(target_sentence, split_sentence))
+            recalls.append(recall(target_sentence, split_sentence))
+            f1s.append(f1_score(target_sentence, split_sentence))
+
+        print("Precision: ", average(precisions))
+        print("Recall: ", average(recalls))
+        print("F1-Score: ", average(f1s))
