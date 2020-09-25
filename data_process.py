@@ -119,6 +119,62 @@ def disambiguate(origin_path, new_vocab, save_path, max_len=5):
         json.dump(vocab, save_file, ensure_ascii=False)
 
 
+def vocab_disambiguate(origin_path, new_vocab, save_path, max_len=5):
+    origin_lines = ''
+    vocab = dict()
+    with open(origin_path, 'r', encoding='utf-8') as origin_file:
+        for line in origin_file:
+            origin_lines += ' ' + line
+    count = 0
+    with open(new_vocab, 'r', encoding='utf-8') as new_file:
+        old_vocab = json.load(new_file)
+        with open('data/amb_pku.txt', 'w', encoding='utf-8') as result_file:
+            for word in old_vocab:
+                count += 1
+                if count % 1000 == 0:
+                    print(count)
+                if len(word) > max_len:
+                    continue
+                else:
+                    for i in range(1, len(word)):
+                        new_word = ' ' + word[:i] + ' ' + word[i:] + ' '
+                        if new_word in origin_lines:
+                            print(new_word)
+                            result_file.write(new_word + '\n')
+                            break
+                    else:
+                        vocab[word] = vocab.get(word, 0) + 1
+    with open(save_path, 'w', encoding='utf-8') as save_file:
+        json.dump(vocab, save_file, ensure_ascii=False)
+
+
+def train_disambiguate(train_path, vocab_path, save_path, log_path):
+    origin_lines = ''
+    vocab = dict()
+    with open(train_path, 'r', encoding='utf-8') as origin_file:
+        for line in origin_file:
+            origin_lines += ' ' + line
+    count = 0
+    with open(vocab_path, 'r', encoding='utf-8') as new_file:
+        old_vocab = json.load(new_file)
+        with open(log_path, 'w', encoding='utf-8') as result_file:
+            for word in old_vocab:
+                count += 1
+                if count % 1000 == 0:
+                    print(count)
+                else:
+                    for i in range(1, len(word)):
+                        new_word = ' ' + word[:i] + ' ' + word[i:] + ' '
+                        if origin_lines.count(new_word) > origin_lines.count(' ' + word + ' '):
+                            print(new_word)
+                            result_file.write(new_word + '\n')
+                            break
+                    else:
+                        vocab[word] = vocab.get(word, 0) + 1
+    with open(save_path, 'w', encoding='utf-8') as save_file:
+        json.dump(vocab, save_file, ensure_ascii=False)
+
+
 escape = ['一次', '这个', '那个', '这次', '那次', '此次', '最低',
           '最高', '最多', '最少', '最佳', '最好', '最新', '就是',
           '都是', '一天', '同一', '一个', '各个', '每个', '哪个',
@@ -132,5 +188,7 @@ if __name__ == '__main__':
     # generate_vocab('data/places.txt', 'vocab/place_vocab.json', place_get_word, max_len=6)
     # pku = Data('data/Chinese_Names_Corpus（120W）.txt')
     # pku.zh_token2vocab('vocab/ch_name_vocab.json')
-    store_vocab('vocab/escape_vocab.json', dict(zip(escape, [1 for x in escape])))
+    # store_vocab('vocab/escape_vocab.json', dict(zip(escape, [1 for x in escape])))
     # disambiguate('data/train.txt', 'data/30wChinese.txt', 'vocab/chinese_vocab.json')
+    vocab_disambiguate('data/all.txt', 'vocab/place_vocab.json', 'vocab/new_place_vocab.json')
+    # train_disambiguate('data/all.txt', 'vocab/zh_vocab_dict.json', 'vocab/new_zh_vocab.json', 'train_amb.txt')

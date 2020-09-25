@@ -7,12 +7,12 @@ import eval
 
 if __name__ == "__main__":
     vocab = dict()
-    vocab_paths = ['vocab/zh_vocab_dict.json',
-                   'vocab/caijing_vocab.json',
-                   'vocab/food_vocab.json',
-                   'vocab/chengyu_vocab.json',
-                   'vocab/diming_vocab.json',
-                   'vocab/pku_vocab.json',
+    vocab_paths = ['vocab/new_zh_vocab.json',
+                   'vocab/new_caijing_vocab.json',
+                   'vocab/new_food_vocab.json',
+                   'vocab/new_chengyu_vocab.json',
+                   'vocab/new_diming_vocab.json',
+                   'vocab/new_pku_vocab.json',
                    'vocab/eng_name_vocab.json',
                    'vocab/place_vocab.json',
                    'vocab/chinese_vocab.json']
