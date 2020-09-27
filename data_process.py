@@ -109,7 +109,7 @@ def disambiguate(origin_path, new_vocab, save_path, max_len=5):
                 else:
                     for i in range(1, len(word)):
                         new_word = ' ' + word[:i] + ' ' + word[i:] + ' '
-                        if new_word in origin_lines:
+                        if origin_lines.count(new_word) > origin_lines.count(' ' + word + ' '):
                             print(new_word)
                             result_file.write(new_word + '\n')
                             break
@@ -138,7 +138,7 @@ def vocab_disambiguate(origin_path, new_vocab, save_path, max_len=5):
                 else:
                     for i in range(1, len(word)):
                         new_word = ' ' + word[:i] + ' ' + word[i:] + ' '
-                        if new_word in origin_lines:
+                        if origin_lines.count(new_word) > origin_lines.count(' ' + word + ' '):
                             print(new_word)
                             result_file.write(new_word + '\n')
                             break
@@ -175,20 +175,13 @@ def train_disambiguate(train_path, vocab_path, save_path, log_path):
         json.dump(vocab, save_file, ensure_ascii=False)
 
 
-escape = ['一次', '这个', '那个', '这次', '那次', '此次', '最低',
-          '最高', '最多', '最少', '最佳', '最好', '最新', '就是',
-          '都是', '一天', '同一', '一个', '各个', '每个', '哪个',
-          '一片', '一对', '一家', '一步', '一本']
-
 if __name__ == '__main__':
     # generate_vocab('data/THUOCL_diming.txt', 'vocab/diming_vocab.json', THUOCL_get_word)
     # generate_vocab('data/THUOCL_chengyu.txt', 'vocab/chengyu_vocab.json', THUOCL_get_word)
     # generate_vocab('data/THUOCL_caijing.txt', 'vocab/caijing_vocab.json', THUOCL_get_word)
     # generate_vocab('data/THUOCL_food.txt', 'vocab/food_vocab.json', THUOCL_get_word)
     # generate_vocab('data/places.txt', 'vocab/place_vocab.json', place_get_word, max_len=6)
-    # pku = Data('data/Chinese_Names_Corpus（120W）.txt')
-    # pku.zh_token2vocab('vocab/ch_name_vocab.json')
     # store_vocab('vocab/escape_vocab.json', dict(zip(escape, [1 for x in escape])))
-    # disambiguate('data/train.txt', 'data/30wChinese.txt', 'vocab/chinese_vocab.json')
-    vocab_disambiguate('data/all.txt', 'vocab/place_vocab.json', 'vocab/new_place_vocab.json')
+    # disambiguate('data/all.txt', 'data/30wChinese.txt', 'vocab/chinese_vocab.json')
+    vocab_disambiguate('data/all.txt', 'vocab/pku_vocab.json', 'vocab/new_food_vocab.json')
     # train_disambiguate('data/all.txt', 'vocab/zh_vocab_dict.json', 'vocab/new_zh_vocab.json', 'train_amb.txt')

@@ -3,24 +3,18 @@
 import re
 from typing import Set, AnyStr, Pattern
 
-# class Preprocesser:
-zh_eng_num = re.compile(r"[\u4e00-\u9fa5a-zA-Z0-9]", re.UNICODE)
-zh_detail = re.compile(r"([\u4E00-\u9FD5]+)", re.UNICODE)
-skip_detail = re.compile(r"([.0-9]+|[a-zA-Z0-9]+)")
-eng = re.compile(r"[a-zA-Z0-9]+")
-num = re.compile("[.0-9]+")
 
-emoji = re.compile(r"→_→", re.UNICODE)
+# emoji = re.compile(r"→_→", re.UNICODE)
 web = re.compile(r"(([a-zA-Z0-9]([a-zA-Z0-9\-@_]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,6})", re.UNICODE)
 name = re.compile(r"[.0-9]*[a-zA-Z_āáǎàēéěèūúǔùōóǒòīíǐìǖǘǚǜü]+[.0-9]*[a-zA-Z_]*", re.UNICODE)
 count = re.compile(r"([0-9]+/[0-9]+|[第]*([.0-9]+,)*[.0-9]+[%％]*[余多]*[十百千万亿]*[余多]*)",
                    re.UNICODE)
 time = re.compile(r"[.0-9]+[月日时][早晚]?|[0-9]{4}年|[0-9]+年代|[一二三四五六七八九]+十年代|[0-9]+[分点](?!钟)|(?<![0-9])[0-9]{2}后",
                   re.UNICODE)
-spliter = re.compile(r"[，！。？《》,@“”（）【】、‘’：；↓→↑←#:;()]|…{1,2}|—{1,2}|/{1,2}|~+|\.+", re.UNICODE)
+spliter = re.compile(r"[，！。？《》,@“”（）【】、‘’：；↓→↑←#:;()]|…{1,2}|—{1,2}|/{1,2}|~+|\.+|·+", re.UNICODE)
 
-# emoji -> web -> name -> time -> count -> spliter
-patterns = [emoji, web, name, time, count, spliter]
+# web -> name -> time -> count -> spliter
+patterns = [web, name, time, count, spliter]
 
 
 def add_space(matched):
