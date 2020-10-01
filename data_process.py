@@ -5,51 +5,38 @@ import re
 from typing import AnyStr, List
 
 
-class Data:
-    def __init__(self, path):
-        self.data_path = path
-
-    def token2vocab(self, save_path=None):
-        vocab = dict()
-        cop = re.compile("[^\u4e00-\u9fa5a-zA-Z0-9 ]+")
-        with open(self.data_path, 'r', encoding='utf-8') as data_file:
-            for line in data_file:
-                new_line = cop.sub('', line)
-                for word in new_line.split():
-                    vocab[word] = vocab.get(word, 0) + 1
-        if save_path is not None:
-            with open(save_path, 'w', encoding='utf-8') as json_file:
-                json.dump(vocab, json_file, ensure_ascii=False)
-        return vocab
-
-    def zh_token2vocab(self, save_path=None, encoding='utf-8'):
-        max_length = 0
-        vocab = dict()
-        cop = re.compile("[^\u4e00-\u9fa5 ]+")
-        with open(self.data_path, 'r', encoding=encoding) as data_file:
-            for line in data_file:
-                new_line = cop.sub('', line)
-                for word in new_line.split():
-                    if len(word) > max_length:
-                        max_length = len(word)
-                    vocab[word] = vocab.get(word, 0) + 1
-        if save_path is not None:
-            with open(save_path, 'w', encoding='utf-8') as json_file:
-                json.dump(vocab, json_file, ensure_ascii=False)
-        print(max_length)
-        return vocab
+def zh_token2vocab(data_path, save_path=None, encoding='utf-8'):
+    """Generate chinese word vocab."""
+    max_length = 0
+    vocab = dict()
+    cop = re.compile("[^\u4e00-\u9fa5 ]+")
+    with open(data_path, 'r', encoding=encoding) as data_file:
+        for line in data_file:
+            new_line = cop.sub('', line)
+            for word in new_line.split():
+                if len(word) > max_length:
+                    max_length = len(word)
+                vocab[word] = vocab.get(word, 0) + 1
+    if save_path is not None:
+        with open(save_path, 'w', encoding='utf-8') as json_file:
+            json.dump(vocab, json_file, ensure_ascii=False)
+    print(max_length)
+    return vocab
 
 
 def get_vocab(path):
+    """Load vocab from json file."""
     with open(path, "r", encoding='utf-8') as json_file:
         return json.load(json_file)
 
 
 def store_vocab(path, vocab):
+    """Store a Dict vocab to a json file."""
     with open(path, 'w', encoding='utf-8') as json_file:
         json.dump(vocab, json_file, ensure_ascii=False)
 
 
+# methods of getting word from different datasets.
 def THUOCL_get_word(line):
     return [line[:line.find('\t')]]
 
@@ -78,6 +65,7 @@ def place_get_word(line):
 
 
 def generate_vocab(origin_path, save_path, func=naive_get_word, max_len=3):
+    """Generate vocab from datasets."""
     vocab = dict()
     with open(origin_path, 'r', encoding='utf-8') as origin_file:
         for line in origin_file:
@@ -90,6 +78,14 @@ def generate_vocab(origin_path, save_path, func=naive_get_word, max_len=3):
 
 
 def disambiguate(origin_path, new_vocab, save_path, max_len=5):
+    """
+    Disambiguate the segmentation interests of different datasets.
+
+    :param origin_path: The reference dataset.
+    :param new_vocab: The additional dataset.
+    :param save_path: Vocabulary saving path.
+    :param max_len: Max word length to save into vocab.
+    """
     origin_lines = ''
     vocab = dict()
     with open(origin_path, 'r', encoding='utf-8') as origin_file:
@@ -120,6 +116,15 @@ def disambiguate(origin_path, new_vocab, save_path, max_len=5):
 
 
 def vocab_disambiguate(origin_path, new_vocab, save_path, max_len=5):
+    """
+    Disambiguate the segmentation interests of different datasets.
+
+    :param origin_path: The reference dataset.
+    :param new_vocab: The additional vocab.
+    :param save_path: Vocabulary saving path.
+    :param max_len: Max word length to save into vocab.
+    """
+
     origin_lines = ''
     vocab = dict()
     with open(origin_path, 'r', encoding='utf-8') as origin_file:
@@ -148,7 +153,15 @@ def vocab_disambiguate(origin_path, new_vocab, save_path, max_len=5):
         json.dump(vocab, save_file, ensure_ascii=False)
 
 
-def train_disambiguate(train_path, vocab_path, save_path, log_path):
+def train_disambiguate(train_path, vocab_path, save_path):
+    """
+    Disambiguate the segmentation interests of within training datasets.
+
+    :param train_path: Training file
+    :param vocab_path: Vocab from training set
+    :param save_path: New vocab saving path
+    """
+
     origin_lines = ''
     vocab = dict()
     with open(train_path, 'r', encoding='utf-8') as origin_file:
@@ -157,31 +170,46 @@ def train_disambiguate(train_path, vocab_path, save_path, log_path):
     count = 0
     with open(vocab_path, 'r', encoding='utf-8') as new_file:
         old_vocab = json.load(new_file)
-        with open(log_path, 'w', encoding='utf-8') as result_file:
-            for word in old_vocab:
-                count += 1
-                if count % 1000 == 0:
-                    print(count)
+        for word in old_vocab:
+            count += 1
+            if count % 1000 == 0:
+                print(count)
+            else:
+                for i in range(1, len(word)):
+                    new_word = ' ' + word[:i] + ' ' + word[i:] + ' '
+                    if origin_lines.count(new_word) > origin_lines.count(' ' + word + ' '):
+                        print(new_word)
+                        break
                 else:
-                    for i in range(1, len(word)):
-                        new_word = ' ' + word[:i] + ' ' + word[i:] + ' '
-                        if origin_lines.count(new_word) > origin_lines.count(' ' + word + ' '):
-                            print(new_word)
-                            result_file.write(new_word + '\n')
-                            break
-                    else:
-                        vocab[word] = vocab.get(word, 0) + 1
+                    vocab[word] = vocab.get(word, 0) + 1
     with open(save_path, 'w', encoding='utf-8') as save_file:
         json.dump(vocab, save_file, ensure_ascii=False)
 
 
 if __name__ == '__main__':
-    # generate_vocab('data/THUOCL_diming.txt', 'vocab/diming_vocab.json', THUOCL_get_word)
-    # generate_vocab('data/THUOCL_chengyu.txt', 'vocab/chengyu_vocab.json', THUOCL_get_word)
-    # generate_vocab('data/THUOCL_caijing.txt', 'vocab/caijing_vocab.json', THUOCL_get_word)
-    # generate_vocab('data/THUOCL_food.txt', 'vocab/food_vocab.json', THUOCL_get_word)
-    # generate_vocab('data/places.txt', 'vocab/place_vocab.json', place_get_word, max_len=6)
-    # store_vocab('vocab/escape_vocab.json', dict(zip(escape, [1 for x in escape])))
-    # disambiguate('data/all.txt', 'data/30wChinese.txt', 'vocab/chinese_vocab.json')
-    vocab_disambiguate('data/all.txt', 'vocab/pku_vocab.json', 'vocab/new_food_vocab.json')
-    # train_disambiguate('data/all.txt', 'vocab/zh_vocab_dict.json', 'vocab/new_zh_vocab.json', 'train_amb.txt')
+    # 'vocab/new_zh_vocab.json',
+    # 'vocab/new_caijing_vocab.json',
+    # 'vocab/new_food_vocab.json',
+    # 'vocab/new_chengyu_vocab.json',
+    # 'vocab/new_diming_vocab.json',
+    # 'vocab/new_pku_vocab.json',
+    # 'vocab/eng_name_vocab.json',
+    # 'vocab/place_vocab.json',
+    # 'vocab/chinese_vocab.json'
+
+    zh_token2vocab('data/all.txt', 'vocab/zh_vocab_dict.json')
+    zh_token2vocab('data/pku_training.txt', 'vocab/pku_dict.json', encoding='gbk')
+    zh_token2vocab('data/English_Cn_Name_Corpus（48W）.txt', 'vocab/eng_name_vocab.json')
+    generate_vocab('data/THUOCL_diming.txt', 'vocab/diming_vocab.json', THUOCL_get_word)
+    generate_vocab('data/THUOCL_chengyu.txt', 'vocab/chengyu_vocab.json', THUOCL_get_word)
+    generate_vocab('data/THUOCL_caijing.txt', 'vocab/caijing_vocab.json', THUOCL_get_word)
+    generate_vocab('data/THUOCL_food.txt', 'vocab/food_vocab.json', THUOCL_get_word)
+    generate_vocab('data/places.txt', 'vocab/place_vocab.json', place_get_word, max_len=6)
+
+    train_disambiguate('data/all.txt', 'vocab/zh_vocab_dict.json', 'vocab/new_zh_vocab.json')
+    disambiguate('data/all.txt', 'data/30wChinese.txt', 'vocab/chinese_vocab.json')
+    vocab_disambiguate('data/all.txt', 'vocab/pku_vocab.json', 'vocab/new_pku_vocab.json')
+    vocab_disambiguate('data/all.txt', 'vocab/diming_vocab.json', 'vocab/new_diming_vocab.json')
+    vocab_disambiguate('data/all.txt', 'vocab/chengyu_vocab.json', 'vocab/new_chengyu_vocab.json')
+    vocab_disambiguate('data/all.txt', 'vocab/caijing_vocab.json', 'vocab/new_caijing_vocab.json')
+    vocab_disambiguate('data/all.txt', 'vocab/food_vocab.json', 'vocab/new_food_vocab.json')

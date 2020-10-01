@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
+#
+# This file is to define the method to analyze a sentence after preprocess, and segment it.
+# In this case, method BMM is applyed.
 
 from typing import List, AnyStr, Dict, Set
 
@@ -7,8 +10,10 @@ max_vocab_length = 8
 
 
 def FMM(string: AnyStr, vocab: Dict):
+    """Forward Maximum Maching."""
+
     ans = []
-    non_matches = []
+    unmatched = []
     sentence_length = len(string)
     width = min(sentence_length, max_vocab_length)
 
@@ -16,6 +21,7 @@ def FMM(string: AnyStr, vocab: Dict):
     while i < sentence_length:
         for j in range(width, 0, -1):
             right = i + j
+            # In canse of index overflow
             right = right if right < sentence_length else sentence_length
             if right - i < j:
                 continue
@@ -25,16 +31,19 @@ def FMM(string: AnyStr, vocab: Dict):
                 i += j
                 break
         else:
-            non_matches.append(len(ans))
+            # Recording non-match characters' index for next step.
+            unmatched.append(len(ans))
             ans.append(string[i])
             i += 1
-    ans = connect_non_matches(ans, non_matches)
+    ans = connect_non_matches(ans, unmatched)
     return ans
 
 
 def RMM(string: AnyStr, vocab: Dict):
+    """Reversed Maximum Maching."""
+
     ans = []
-    non_matches = []
+    unmatched = []
     sentence_length = len(string)
     width = min(sentence_length, max_vocab_length)
 
@@ -42,6 +51,7 @@ def RMM(string: AnyStr, vocab: Dict):
     while i >= 0:
         for j in range(width, 0, -1):
             left = i - j + 1
+            # In canse of index underflow
             left = left if left >= 0 else 0
             if i + 1 - left < j:
                 continue
@@ -51,17 +61,20 @@ def RMM(string: AnyStr, vocab: Dict):
                 i -= j
                 break
         else:
-            non_matches.append(len(ans))
+            # Recording non-match characters' index for next step.
+            unmatched.append(len(ans))
             ans.append(string[i])
             i -= 1
+    # Reverse the matched list and unmatched list back
     ans = ans[::-1]
-    non_matches = non_matches[::-1]
-    non_matches = [len(ans) - match - 1 for match in non_matches]
-    ans = connect_non_matches(ans, non_matches)
+    unmatched = unmatched[::-1]
+    unmatched = [len(ans) - match - 1 for match in unmatched]
+    ans = connect_non_matches(ans, unmatched)
     return ans
 
 
 def count_single_word(segments):
+    """Count amount of single word in a list."""
     count = 0
     for word in segments:
         if len(word) == 1:
@@ -71,10 +84,10 @@ def count_single_word(segments):
 
 def BMM(string, vocab):
     """
-    1.假设正反向分词结果词数不同，则取分词数量较少的那个。
-    2.假设分词结果词数同样
-         a.分词结果同样，就说明没有歧义，可返回随意一个。
-         b.分词结果不同。返回当中单字较少的那个。
+    1. Assume that we got different words count between RMM and FMM results, then return the segments with less words.
+    2. Assume that we got same words count
+         a. Same result. Return it.
+         b. Different result. Return segments with less single words.
     """
     rmm_result = RMM(string, vocab)
     fmm_result = FMM(string, vocab)
@@ -87,13 +100,16 @@ def BMM(string, vocab):
             return min([rmm_result, fmm_result], key=count_single_word)
 
 
-def connect_non_matches(strings, non_matches):
+def connect_non_matches(strings, unmatched):
+    """Some continuous unmatched character may combine a new word. Connect them to be a new segment."""
     ans = []
     connect_str = ''
     length = len(strings)
+
+    # unmatched is a list of unmatched characters index. Traverse the original line.
     for i in range(length):
-        if i in non_matches:
-            if i < length - 1 and i + 1 in non_matches:
+        if i in unmatched:
+            if i < length - 1 and i + 1 in unmatched:
                 connect_str += strings[i]
             else:
                 connect_str += strings[i]
@@ -105,19 +121,21 @@ def connect_non_matches(strings, non_matches):
 
 
 def analyze(sentence: List, matched: Set, vocab: Dict):
+    """
+    Analyze step.
+    :param sentence: List, sentence after preprocess
+    :param matched: Set, matched symbols from preprocess
+    :param vocab: Dict, vocabulary
+    :return: String, sentence string splited by space
+    """
+
     result = []
+    method = BMM
+
     for string in sentence:
         if string in matched:
             result.append(string)
         else:
-            result.extend(BMM(string, vocab))
+            result.extend(method(string, vocab))
     result_str = ' '.join(result)
     return result_str
-
-
-# if __name__ == '__main__':
-#     line = ['北京大学生前来应聘了吗', '，', '前来应聘']
-#     vocab = ["北京大学", "生前", "来", "应聘", "大学生", "前来", "北京"]
-#     vocab = dict(zip(vocab, range(len(vocab))))
-#     matched = {'，'}
-#     print(analyze(line, matched, vocab))

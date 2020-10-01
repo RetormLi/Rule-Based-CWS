@@ -69,6 +69,7 @@ def recall(target, pred):
 
 
 def f1_score(target, pred):
+    """Calculate F1-Score"""
     prec = precision(target, pred)
     rec = recall(target, pred)
     if prec == 0 and rec == 0:
