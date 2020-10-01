@@ -22,7 +22,7 @@ if __name__ == "__main__":
                    'vocab/chinese_vocab.json']
     for path in vocab_paths:
         vocab.update(data_process.get_vocab(path))
-    # data_process.store_vocab('vocab/big_vocab_dict.json', vocab)
+    data_process.store_vocab('vocab/big_vocab_dict.json', vocab)
 
     # get vocab from file
     # vocab = data_process.get_vocab('vocab/big_vocab_dict.json')
