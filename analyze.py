@@ -84,10 +84,11 @@ def count_single_word(segments):
 
 def BMM(string, vocab):
     """
-    1. Assume that we got different words count between RMM and FMM results, then return the segments with less words.
-    2. Assume that we got same words count
+    1. If we got different words count between RMM and FMM results, then return the segments with less words.
+    2. If we got same words count
          a. Same result. Return it.
          b. Different result. Return segments with less single words.
+            If have same amount of single words, return RMM result.
     """
     rmm_result = RMM(string, vocab)
     fmm_result = FMM(string, vocab)

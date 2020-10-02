@@ -198,8 +198,8 @@ if __name__ == '__main__':
     # 'vocab/chinese_vocab.json'
 
     zh_token2vocab('data/all.txt', 'vocab/zh_vocab_dict.json')
-    zh_token2vocab('data/pku_training.txt', 'vocab/pku_dict.json', encoding='gbk')
-    zh_token2vocab('data/English_Cn_Name_Corpus（48W）.txt', 'vocab/eng_name_vocab.json')
+    zh_token2vocab('data/pku_training.txt', 'vocab/pku_vocab.json', encoding='gbk')
+    generate_vocab('data/English_Cn_Name_Corpus（48W）.txt', 'vocab/eng_name_vocab.json')
     generate_vocab('data/THUOCL_diming.txt', 'vocab/diming_vocab.json', THUOCL_get_word)
     generate_vocab('data/THUOCL_chengyu.txt', 'vocab/chengyu_vocab.json', THUOCL_get_word)
     generate_vocab('data/THUOCL_caijing.txt', 'vocab/caijing_vocab.json', THUOCL_get_word)

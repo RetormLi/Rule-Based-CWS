@@ -8,7 +8,7 @@ import analyze
 if __name__ == "__main__":
     vocab = dict()
     to_pred_file = 'data/test.txt'
-    target_file = '181220032.txt'
+    target_file = 'prediction.txt'
 
     # combine vocabulary
     vocab_paths = ['vocab/new_zh_vocab.json',
